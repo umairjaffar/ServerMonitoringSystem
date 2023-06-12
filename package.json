@@ -3,19 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.3",
+    "@mui/x-data-grid": "^6.5.0",
+    "@paypal/react-paypal-js": "^7.8.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.4.0",
+    "file-saver": "^2.0.5",
+    "json-server": "^0.17.3",
+    "material-ui-popup-state": "^5.0.8",
+    "mui-one-time-password-input": "^1.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.9.0",
+    "react-router-dom": "^6.11.2",
     "react-scripts": "5.0.1",
+    "react-swipeable-views": "^0.14.0",
+    "react-timer-hook": "^3.0.6",
+    "recharts": "^2.6.2",
+    "sweetalert2": "^11.7.8",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "json-server": "json-server --watch ./src/database/db.json --host 127.0.0.1 --port 5000"
   },
   "eslintConfig": {
     "extends": [
