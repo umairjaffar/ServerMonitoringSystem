@@ -15,9 +15,11 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
+import FolderZipIcon from "@mui/icons-material/FolderZip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import axios from "axios";
+import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { BASE_URL } from "../../components/constant/constant";
@@ -170,6 +172,13 @@ const ViewServers = () => {
               <ListItemText primary="Update Server" />
             </MenuItem>
             <Divider />
+            <MenuItem onClick={() => handleRegenerateFile(ID)}>
+              <ListItemIcon>
+                <FolderZipIcon style={{ color: "#009688" }} />
+              </ListItemIcon>
+              <ListItemText primary="Regenerate Zip File" />
+            </MenuItem>
+            <Divider />
             <MenuItem onClick={() => handleDeleteServer(ID)}>
               <ListItemIcon>
                 <DeleteIcon style={{ color: "red" }} />
@@ -187,10 +196,80 @@ const ViewServers = () => {
     handleClose();
   };
   const handleUpdateServer = (ID) => {
-    console.log("ID", ID);
     navigate(`/dashboard/user/updateServer/${ID.row.Server_id}`);
     handleClose();
   };
+  const handleRegenerateFile = async (ID) => {
+    const accesstoken = localStorage.getItem("access_token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accesstoken}`,
+      },
+    };
+    console.log("ID", ID.row);
+    const response = await axios.post(
+      `${BASE_URL}/regeneratedataforbashscriptfile`,
+      ID.row,
+      config
+    );
+
+    if (response.data.success) {
+      Swal.fire({
+        title: "Download Zip file",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Download",
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          await axios({
+            method: "post",
+            url: `${BASE_URL}/serverdetailfile`,
+            data: null,
+            responseType: "blob",
+            headers: {
+              Authorization: `Bearer ${accesstoken}`,
+            },
+          })
+            .then((response) => {
+              // Rest of the code remains the same
+              console.log("FileResponse", response);
+              const contentDispositionHeader =
+                response.headers["content-disposition"];
+              const fileName = contentDispositionHeader
+                ? contentDispositionHeader
+                    .split("filename=")[1]
+                    .trim()
+                    .replace(/"/g, "")
+                : "serverbashscript.zip";
+
+              const blob = new Blob([response.data], {
+                type: "application/zip",
+              });
+              saveAs(blob, fileName);
+            })
+            .catch((error) => {
+              Swal.showValidationMessage(`Request failed: ${error}`);
+            });
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire("Downloaded!", response.data.messege, "success").then(
+            (result) => {
+              if (result.isConfirmed) {
+                navigate("/dashboard/user/viewServers");
+              }
+            }
+          );
+        }
+      });
+    } else {
+      Swal.fire("ERROR!", response.data.messege, "error");
+    }
+  };
+
+  // Delete Server...............................................
   const handleDeleteServer = (ID) => {
     const accesstoken = localStorage.getItem("access_token");
     const config = {

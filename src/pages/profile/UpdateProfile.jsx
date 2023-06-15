@@ -9,6 +9,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 const UpdateProfile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState();
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const getUserUpdate = async () => {
@@ -46,6 +47,31 @@ const UpdateProfile = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  const validate = (values) => {
+    const errors = {};
+    const stringRegex = /^[a-zA-Z]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!values.First_name) {
+      errors.First_name = "First name must be required!";
+    } else if (!stringRegex.test(values.First_name)) {
+      errors.First_name = "String containing only English alphabets!";
+    }
+
+    if (!values.Last_name) {
+      errors.Last_name = "Last name must be required!";
+    } else if (!stringRegex.test(values.Last_name)) {
+      errors.Last_name = "String containing only English alphabets!";
+    }
+
+    if (!values.email) {
+      errors.email = "User email must be required!";
+    } else if (!regex.test(values.email)) {
+      errors.email = "This is not a valid email format!";
+    }
+
+    return errors;
+  };
   console.log("userUpdate", user);
   const updateProfileHandler = (e) => {
     e.preventDefault();
@@ -59,49 +85,53 @@ const UpdateProfile = () => {
     formData.append("fname", user.First_name);
     formData.append("lname", user.Last_name);
     formData.append("email", user.email);
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Update it!",
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}/updateuserdata`,
-            formData,
-            config
-          );
-          console.log("UpdatedDataRes", response);
-          if (response?.data?.success) {
-            Swal.fire(
-              "Updated!",
-              "User profile updated successfull.",
-              "success"
-            ).then((result) => {
-              if (result.isConfirmed) {
-                navigate("/dashboard/user/profile");
-              }
-            });
-          } else if (response?.data?.token_error) {
-            Swal.fire("ERROR!", response?.data?.message, "error").then(
-              (result) => {
-                if (result.isConfirmed) {
-                  navigate("/login");
-                }
-              }
+    const validationErrors = validate(user);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Update it!",
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          try {
+            const response = await axios.post(
+              `${BASE_URL}/updateuserdata`,
+              formData,
+              config
             );
-          } else {
-            Swal.fire("Error!", response?.data?.messege, "error");
+            console.log("UpdatedDataRes", response);
+            if (response?.data?.success) {
+              Swal.fire(
+                "Updated!",
+                "User profile updated successfully.",
+                "success"
+              ).then((result) => {
+                if (result.isConfirmed) {
+                  navigate("/dashboard/user/profile");
+                }
+              });
+            } else if (response?.data?.token_error) {
+              Swal.fire("ERROR!", response?.data?.message, "error").then(
+                (result) => {
+                  if (result.isConfirmed) {
+                    navigate("/login");
+                  }
+                }
+              );
+            } else {
+              Swal.fire("Error!", response?.data?.messege, "error");
+            }
+          } catch (error) {
+            console.log("updateProfile ERROR", error);
           }
-        } catch (error) {
-          console.log("updateProfile ERROR", error);
-        }
-      },
-    });
+        },
+      });
+    }
   };
   return (
     <Box
@@ -154,6 +184,7 @@ const UpdateProfile = () => {
                     name="First_name"
                     onChange={handleChange}
                   />
+                  <Typography color={"error"}>{errors.First_name}</Typography>
                 </Grid>
                 <Grid item xs={12} md={5.8}>
                   <TextField
@@ -163,6 +194,7 @@ const UpdateProfile = () => {
                     name="Last_name"
                     onChange={handleChange}
                   />
+                  <Typography color={"error"}>{errors.Last_name}</Typography>
                 </Grid>
               </Grid>
             </Grid>
@@ -174,6 +206,7 @@ const UpdateProfile = () => {
                 name="email"
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.email}</Typography>
             </Grid>
             <Grid item xs={10}>
               <Box sx={{ display: "flex", justifyContent: "center" }}>

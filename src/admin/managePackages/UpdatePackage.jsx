@@ -38,6 +38,7 @@ const UpdatePackage = () => {
     taxpercentage: "",
   };
   const [updatePackage, setUpdatePackage] = useState(initialValues);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const getPackage = async () => {
@@ -89,15 +90,92 @@ const UpdatePackage = () => {
     });
   };
 
+  console.log("errors", errors);
+  const validate = (values) => {
+    const errors = {};
+    const numRegex = /^(\d+|\d+\.\d+)$/;
+    const stringRegex = /^[a-zA-Z\s]+$/;
+    if (!values.Package_Name) {
+      errors.Package_Name = "Package name must be required!";
+    } else if (!stringRegex.test(values.Package_Name)) {
+      errors.Package_Name = "Package name accept only alphabets!";
+    }
+
+    if (values.price) {
+      if (values.price <= 0) {
+        errors.price = "Package price must be greater than 0!";
+      } else if (values.price > 100000) {
+        errors.price = "Package price must be less than 100000!";
+      } else if (!numRegex.test(values.price)) {
+        errors.price = "Package price accept only numbers!";
+      }
+    }
+
+    if (!values.description) {
+      errors.description = "Package description must be required!";
+    } else if (values.description.length <= 0) {
+      errors.description = "Package description must be greater than 0!";
+    } else if (values.description.length > 2000) {
+      errors.description = "Package description must be less than 2000!";
+    }
+
+    if (values.no_of_server) {
+      if (values.no_of_server <= 0) {
+        errors.no_of_server = "Number of servers must be greater than 0!";
+      } else if (values.no_of_server > 100) {
+        errors.no_of_server = "Number of servers must be less than 100!";
+      } else if (!numRegex.test(values.no_of_server)) {
+        errors.no_of_server = "Number of servers accept only numbers!";
+      }
+    }
+    if (values.no_of_deveopusrs) {
+      if (values.no_of_deveopusrs <= 0) {
+        errors.no_of_deveopusrs = "Number of devopUsers must be greater than 0!";
+      } else if (values.no_of_deveopusrs > 100) {
+        errors.no_of_deveopusrs = "Number of devopUsers must be less than 100!";
+      } else if (!numRegex.test(values.no_of_deveopusrs)) {
+        errors.no_of_deveopusrs = "Number of devops accept only numbers!";
+      }
+    }
+    if (values.no_of_monitorusrs) {
+      if (values.no_of_monitorusrs <= 0) {
+        errors.no_of_monitorusrs =
+          "Number of monitorUsers must be greater than 0!";
+      } else if (values.no_of_monitorusrs > 100) {
+        errors.no_of_monitorusrs =
+          "Number of monitorUsers must be less than 100!";
+      } else if (!numRegex.test(values.no_of_monitorusrs)) {
+        errors.no_of_monitorusrs = "Number of monitors accept only numbers!";
+      }
+    }
+
+    if (values.Setupfee) {
+      if (values.Setupfee <= 0) {
+        errors.Setupfee = "Setup fee must be greater than 0!";
+      } else if (values.Setupfee > 100) {
+        errors.Setupfee = "Setup fee must be less than 100!";
+      }
+    }
+    if (values.taxpercentage) {
+      if (values.taxpercentage <= 0) {
+        errors.taxpercentage = "Taxpercentage must be greater than 0!";
+      } else if (values.taxpercentage > 100) {
+        errors.taxpercentage = "Taxpercentage must be less than 100!";
+      }
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("name", updatePackage?.Package_Name || "");
     formData.append("activePackage", updatePackage?.isactivate || "");
     formData.append("typeofpack", updatePackage?.type_of_package || "");
     formData.append("price", updatePackage?.price || "");
-    formData.append("servers", updatePackage?.no_of_server || "");
-    formData.append("devopUsers", updatePackage?.no_of_deveopusrs || "");
-    formData.append("monitorUsers", updatePackage?.no_of_monitorusrs || "");
+    formData.append("servers", updatePackage?.no_of_server || 0);
+    formData.append("devopUsers", updatePackage?.no_of_deveopusrs || 0);
+    formData.append("monitorUsers", updatePackage?.no_of_monitorusrs || 0);
     formData.append("description", updatePackage?.description || "");
     formData.append("setupfee", updatePackage?.Setupfee || "");
     formData.append("payFailerThres", updatePackage?.payFailerThres || "");
@@ -117,49 +195,53 @@ const UpdatePackage = () => {
         "Content-Type": "application/json",
       },
     };
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Update it!",
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}/updatepackage/${name}`,
-            jsonData,
-            config
-          );
-          console.log("updateRes", response);
-          if (response?.data?.success) {
-            Swal.fire(
-              "Updated!",
-              "Package updated successfull.",
-              "success"
-            ).then((result) => {
-              if (result.isConfirmed) {
-                navigate("/dashboard/admin");
-              }
-            });
-          } else if (response?.data?.token_error) {
-            Swal.fire("ERROR!", response?.data?.message, "error").then(
-              (result) => {
-                if (result.isConfirmed) {
-                  navigate("/login");
-                }
-              }
+    const validationErrors = validate(updatePackage);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Update it!",
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          try {
+            const response = await axios.post(
+              `${BASE_URL}/updatepackage/${name}`,
+              jsonData,
+              config
             );
-          } else {
-            Swal.fire("Error!", response?.data?.messege, "error");
+            console.log("updateRes", response);
+            if (response?.data?.success) {
+              Swal.fire(
+                "Updated!",
+                "Package updated successfully.",
+                "success"
+              ).then((result) => {
+                if (result.isConfirmed) {
+                  navigate("/dashboard/admin");
+                }
+              });
+            } else if (response?.data?.token_error) {
+              Swal.fire("ERROR!", response?.data?.message, "error").then(
+                (result) => {
+                  if (result.isConfirmed) {
+                    navigate("/login");
+                  }
+                }
+              );
+            } else {
+              Swal.fire("Error!", response?.data?.messege, "error");
+            }
+          } catch (error) {
+            console.log("UpdatePacERROR", error);
           }
-        } catch (error) {
-          console.log("UpdatePacERROR", error);
-        }
-      },
-    });
+        },
+      });
+    }
   };
 
   return (
@@ -217,6 +299,7 @@ const UpdatePackage = () => {
                 name="Package_Name"
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.Package_Name}</Typography>
             </Grid>
           </Grid>
           {/* Package Description */}
@@ -235,6 +318,7 @@ const UpdatePackage = () => {
                 value={updatePackage.description || ""}
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.description}</Typography>
             </Grid>
           </Grid>
           <Grid
@@ -249,20 +333,24 @@ const UpdatePackage = () => {
                 fullWidth
                 type="number"
                 label="No of DevOps Users"
-                value={updatePackage.no_of_deveopusrs || ""}
+                value={updatePackage.no_of_deveopusrs || null}
                 name="no_of_deveopusrs"
                 onChange={handleChangeNumber}
               />
+              <Typography color={"error"}>{errors.no_of_deveopusrs}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
               <TextField
                 fullWidth
                 type="number"
                 label="No of Monitors Users"
-                value={updatePackage.no_of_monitorusrs || ""}
+                value={updatePackage.no_of_monitorusrs || null}
                 name="no_of_monitorusrs"
                 onChange={handleChangeNumber}
               />
+              <Typography color={"error"}>
+                {errors.no_of_monitorusrs}
+              </Typography>
             </Grid>
           </Grid>
           <Grid
@@ -281,6 +369,7 @@ const UpdatePackage = () => {
                   value={updatePackage.price || ""}
                   onChange={handleChange}
                 />
+                <Typography color={"error"}>{errors.price}</Typography>
               </Grid>
             )}
             <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
@@ -288,10 +377,11 @@ const UpdatePackage = () => {
                 fullWidth
                 type="number"
                 label="No of Servers"
-                value={updatePackage.no_of_server || ""}
+                value={updatePackage.no_of_server || null}
                 name="no_of_server"
                 onChange={handleChangeNumber}
               />
+              <Typography color={"error"}>{errors.no_of_server}</Typography>
             </Grid>
           </Grid>
           {/* PayPal Detail */}
@@ -314,6 +404,7 @@ const UpdatePackage = () => {
                   name="Setupfee"
                   onChange={handleChange}
                 />
+                <Typography color={"error"}>{errors.Setupfee}</Typography>
               </Grid>
               <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
                 <TextField
@@ -323,6 +414,7 @@ const UpdatePackage = () => {
                   name="taxpercentage"
                   onChange={handleChange}
                 />
+                <Typography color={"error"}>{errors.taxpercentage}</Typography>
               </Grid>
             </Grid>
           )}
@@ -347,17 +439,17 @@ const UpdatePackage = () => {
               </FormLabel>
               <RadioGroup
                 name="isactivate"
-                value={updatePackage?.isactivate?.toLocaleLowerCase() || ""}
+                value={updatePackage?.isactivate?.toLocaleUpperCase() || ""}
                 onChange={handleChange}
                 style={{ display: "flex", flexDirection: "row", marginLeft: 3 }}
               >
                 <FormControlLabel
-                  value="active"
+                  value="ACTIVE"
                   control={<Radio />}
                   label="Active"
                 />
                 <FormControlLabel
-                  value="inactive"
+                  value="INACTIVE"
                   control={<Radio />}
                   label="Inactive"
                 />

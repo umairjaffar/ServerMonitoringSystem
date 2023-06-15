@@ -19,7 +19,7 @@ import axios from "axios";
 import { BASE_URL } from "../../components/constant/constant";
 import Swal from "sweetalert2";
 
-const ViewUsers = () => {
+const ViewUsers = ({ role }) => {
   const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ const ViewUsers = () => {
 
   const getUsersList = async () => {
     const accesstoken = localStorage.getItem("access_token");
-    console.log("TOKEN", accesstoken);
+    // console.log("TOKEN", accesstoken);
     const config = {
       headers: {
         Authorization: `Bearer ${accesstoken}`,
@@ -46,7 +46,7 @@ const ViewUsers = () => {
     try {
       setLoading(true);
       const resp = await axios.post(
-        `${BASE_URL}/getallusersadmin`,
+        `${BASE_URL}/getallsystemusers`,
         null,
         config
       );
@@ -69,7 +69,7 @@ const ViewUsers = () => {
     getUsersList();
   }, []);
   // console.log("USERS", usersList);
-
+  console.log("role", role);
   const columns = [
     {
       field: "Username",
@@ -172,18 +172,24 @@ const ViewUsers = () => {
               </ListItemIcon>
               <ListItemText primary="Update User" />
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => handleUserSuspension(ID)}>
-              <ListItemText
-                sx={{
-                  textAlign: "center",
-                  color: ID?.row?.Issuspended ? "#4F8A10" : "#D8000C",
-                }}
-                primary={
-                  ID?.row?.Issuspended ? "UnSuspend User" : "Suspend User"
-                }
-              />
-            </MenuItem>
+            {role === "superadmin" ? (
+              <>
+                <Divider />
+                <MenuItem onClick={() => handleUserSuspension(ID)}>
+                  <ListItemText
+                    sx={{
+                      textAlign: "center",
+                      color: ID?.row?.Issuspended ? "#4F8A10" : "#D8000C",
+                    }}
+                    primary={
+                      ID?.row?.Issuspended ? "UnSuspend User" : "Suspend User"
+                    }
+                  />
+                </MenuItem>
+              </>
+            ) : (
+              ""
+            )}
             <Divider />
           </Menu>
         </Box>

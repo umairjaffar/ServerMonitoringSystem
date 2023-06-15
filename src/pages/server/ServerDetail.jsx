@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import ServiceStatus from "./serverDetail/ServiceStatus";
 import ServerPerformance from "./serverDetail/ServerPerformance";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ContainerStatus from "./serverDetail/ContainerStatus";
 import { BASE_URL } from "../../components/constant/constant";
+import ServerStatusGraph from "./serverDetail/Graph";
 
 export default function ServerDetail() {
   const { Server_id } = useParams();
@@ -13,6 +14,7 @@ export default function ServerDetail() {
   const [serverService, serServerService] = useState([]);
   const [serverContainer, serServerContainer] = useState([]);
   const [serverPerformance, serServerPerformance] = useState([]);
+  const [serverName, setServername] = useState("");
   const [loading, setLoading] = useState(false);
 
   const getServerData = async () => {
@@ -38,8 +40,9 @@ export default function ServerDetail() {
         const serverData = servers[0]?.filter(
           (server) => server.Server_Id === Server_id
         );
-        // console.log("SERVICE2", serverData[0].Server_Performance);
+        console.log("SERVICE2", serverData[0]);
         serServerService(serverData[0].Services);
+        setServername(serverData[0].Server_Name);
         serServerContainer(serverData[0].Containers);
         serServerPerformance(serverData[0].Server_Performance);
       }
@@ -66,14 +69,31 @@ export default function ServerDetail() {
         }}
       >
         {!loading ? (
-          <Grid container gap={2}>
+          <Grid container boxShadow={3} marginY={2} padding={1}>
             <Grid item xs={12}>
+              <Typography
+                sx={{
+                  marginX: 3,
+                  fontSize: 28,
+                  fontWeight: "500",
+                  textAlign: "center",
+                  color: "#1976D2",
+                  marginBottom: 0,
+                }}
+              >
+                {serverName}
+              </Typography>
+            </Grid>
+            {/* <Grid item xs={12}>
+              <ServerStatusGraph data={serverService} />
+            </Grid> */}
+            <Grid item xs={12} marginTop={2}>
               <ServiceStatus name="Services" data={serverService} />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} marginTop={2}>
               <ContainerStatus name="Containers" data={serverContainer} />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} marginTop={2}>
               <ServerPerformance
                 name="Server Performance"
                 serverPerformance={serverPerformance}

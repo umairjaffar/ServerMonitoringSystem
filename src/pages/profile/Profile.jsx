@@ -56,6 +56,9 @@ const Profile = () => {
           navigate("/login");
         }
       });
+    } else {
+      setLoading(false);
+      Swal.fire("ERROR!", response?.data?.message, "error");
     }
   };
   useEffect(() => {
@@ -193,24 +196,30 @@ const Profile = () => {
               </Grid>
               {profile?.Role === "prodowner" ? (
                 <Grid item xs={10}>
-                  <TypoText>User Can</TypoText>
+                  <TypoText>User Access Detail</TypoText>
                   <List sx={{ marginLeft: 3 }}>
                     <ListItem>
                       <Icon />
                       <Typography>
-                        add {profile.No_of_servers} servers.
+                        You can add {profile.No_of_servers} servers.
                       </Typography>
                     </ListItem>
                     <ListItem>
                       <Icon />
                       <Typography>
-                        add {profile.No_of_devop_users} devop users.
+                        You can add {profile.No_of_devop_users} devop users.
                       </Typography>
                     </ListItem>
                     <ListItem>
                       <Icon />
                       <Typography>
-                        add {profile.No_of_monitor_users} monitor users.
+                        You can add {profile.No_of_monitor_users} monitor users.
+                      </Typography>
+                    </ListItem>
+                    <ListItem>
+                      <Icon />
+                      <Typography>
+                        You already added {profile.Total_no_servers} servers.
                       </Typography>
                     </ListItem>
                     <ListItem>
@@ -234,7 +243,7 @@ const Profile = () => {
               )}
             </Grid>
           ) : (
-            "UserProfile...."
+            "UserProfile..."
           )}
         </>
       ) : (

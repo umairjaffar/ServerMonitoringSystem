@@ -33,10 +33,11 @@ const UpdateServer = () => {
   const [newContainer, setNewContainer] = useState("");
 
   const [formErrors, setFormErrors] = useState({});
-  const [isSubmit, setIsSubmit] = useState(false);
+  // const [isSubmit, setIsSubmit] = useState(false);
 
   // 1) The findPreServices function check that is there service value
   // is already present in services list or not.
+
   // const findPreServices = updatedServer?.service.find(
   //   (item) => item?.toLowerCase() === newService?.toLowerCase()
   // );
@@ -54,19 +55,22 @@ const UpdateServer = () => {
     };
     // const svrObj = { svrid: id };
     const response = await axios.post(
-      `${BASE_URL}/serverdetaildata/${id}`,
+      `${BASE_URL}/serverdetaildataupdated/${id}`,
       null,
       config
     );
     // console.log("SERVERresp:", response?.data?.User_Servers_Data);
     if (response?.data?.success) {
       const result = response?.data?.User_Servers_Data[0];
+      console.log("updateServerList", result);
       setUpdatedServer({
         ...updatedServer,
         ip: result?.Server_IP,
         name: result?.Server_Name,
-        service: result?.Lst_Services,
-        container: result?.Lst_Containers,
+        service: result?.Lst_Services.filter((service) => service.selected),
+        container: result?.Lst_Containers.filter(
+          (container) => container.selected
+        ),
       });
       // setUpdatedServer(result);
       setSelectOptions(result);
@@ -82,28 +86,11 @@ const UpdateServer = () => {
     getServer();
   }, []);
 
-  // console.log("UpdateServer", updatedServer);
-  // console.log("options", selectOptions);
-  // useEffect(() => {
-  //   const findServer =
-  //     servers && servers?.find((item) => item.Server_id === id);
-  //   // console.log("ServerDetail", findServer);
-  //   if (findServer) {
-  // setUpdatedServer({
-  //   ...updatedServer,
-  //   ip: findServer?.Server_IP,
-  //   service: findServer?.Lst_services,
-  //   container: findServer?.Lst_containers,
-  // });
-  //     setSelectOptions(findServer);
-  //   }
-  // }, [servers]);
-
-  const handleMultiServiceChange = (event, value) => {
-    setUpdatedServer({
-      ...updatedServer,
-      service: value,
-    });
+  const handleMultiServiceChange = (event, selectedOptions) => {
+    setUpdatedServer((prevState) => ({
+      ...prevState,
+      service: selectedOptions,
+    }));
   };
   // If you want to show new added services as options.
   // setSelectOptions((prev) => ({
@@ -114,37 +101,38 @@ const UpdateServer = () => {
     const validationErrors = newServiceValidate(newService);
     setFormErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      if (
-        // !findPreServices &&
-        !formErrors.newService?.length > 0 &&
-        newService.length >= 2
-      ) {
+      if (!formErrors.newService?.length > 0 && newService.length >= 2) {
         setUpdatedServer((prev) => ({
           ...prev,
-          service: [...prev.service, newService],
+          service: [
+            ...prev.service,
+            {
+              selected: false,
+              service: newService,
+            },
+          ],
         }));
         setNewService("");
       }
     }
   };
-  const handleMultiContainerChange = (event, value) => {
-    setUpdatedServer({
-      ...updatedServer,
-      container: value,
-    });
+  const handleMultiContainerChange = (event, selectedOptions) => {
+    setUpdatedServer((prevState) => ({
+      ...prevState,
+      container: selectedOptions,
+    }));
   };
   const handleAddNewContainer = () => {
     const validationErrors = newContainerValidate(newContainer);
     setFormErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      if (
-        // !findPreContainer &&
-        !formErrors.newContainer?.length > 0 &&
-        newContainer.length >= 2
-      ) {
+      if (!formErrors.newContainer?.length > 0 && newContainer.length >= 2) {
         setUpdatedServer((prev) => ({
           ...prev,
-          container: [...prev.container, newContainer],
+          container: [
+            ...prev.container,
+            { selected: false, container: newContainer },
+          ],
         }));
         setNewContainer("");
       }
@@ -161,6 +149,22 @@ const UpdateServer = () => {
       },
     };
     console.log("UPDATED", updatedServer);
+    const services = [];
+    updatedServer?.service.map((item) =>
+      item ? services.push(item.service) : null
+    );
+    const containers = [];
+    updatedServer.container.map((item) =>
+      item ? containers.push(item.container) : null
+    );
+    const newData = {
+      ip: updatedServer.ip,
+      name: updatedServer.name,
+      container: containers,
+      service: services,
+    };
+
+    console.log("updatedData", newData);
     if (Object.keys(validationErrors).length === 0) {
       if (
         updatedServer.service.length > 0 &&
@@ -178,11 +182,7 @@ const UpdateServer = () => {
           preConfirm: async () => {
             try {
               return await axios
-                .post(
-                  `${BASE_URL}/updateserviceandcontainer`,
-                  updatedServer,
-                  config
-                )
+                .post(`${BASE_URL}/updateserviceandcontainer`, newData, config)
                 .then((response) => {
                   console.log("response", response);
                   if (response?.data?.token_error) {
@@ -208,13 +208,13 @@ const UpdateServer = () => {
               title: "Download Zip file",
               // text: "You won't be able to revert this!",
               icon: "info",
-              // showCancelButton: true,
+              showCancelButton: true,
               confirmButtonColor: "#3085d6",
-              // cancelButtonColor: "#d33",
+              cancelButtonColor: "#d33",
               confirmButtonText: "Download",
               showLoaderOnConfirm: true,
               preConfirm: async () => {
-                axios({
+                await axios({
                   method: "post",
                   url: `${BASE_URL}/serverdetailfile`,
                   data: null,
@@ -254,6 +254,8 @@ const UpdateServer = () => {
                     navigate("/dashboard/user/viewServers");
                   }
                 });
+              } else if (result.isDismissed) {
+                navigate("/dashboard/user/viewServers");
               }
             });
           }
@@ -307,19 +309,13 @@ const UpdateServer = () => {
     } else if (newContainer.length < 2) {
       errors.newContainer = "Container name must be at least 2 characters!";
     }
-    //  else if (findPreContainer) {
+    // else if (findPreContainer) {
     //   errors.newContainer =
     //     "Container name already present in containers list!";
     // }
 
     return errors;
   };
-
-  useEffect(() => {
-    if (Object.keys(formErrors).length === 0 && isSubmit) {
-      // console.log("fer,", formErrors);
-    }
-  }, [formErrors, updatedServer, isSubmit]);
 
   return (
     <Box sx={{ width: "100%", height: "100vh" }}>
@@ -379,7 +375,7 @@ const UpdateServer = () => {
                 <Autocomplete
                   multiple
                   options={selectOptions?.Lst_Services || []}
-                  getOptionLabel={(option) => option}
+                  getOptionLabel={(option) => option?.service}
                   value={updatedServer?.service}
                   onChange={handleMultiServiceChange}
                   renderInput={(params) => (
@@ -392,7 +388,11 @@ const UpdateServer = () => {
                   )}
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
-                      <Chip label={option} {...getTagProps({ index })} />
+                      <Chip
+                        key={option.service}
+                        label={option.service}
+                        {...getTagProps({ index })}
+                      />
                     ))
                   }
                 />
@@ -442,7 +442,7 @@ const UpdateServer = () => {
                 <Autocomplete
                   multiple
                   options={selectOptions?.Lst_Containers || []}
-                  getOptionLabel={(option) => option}
+                  getOptionLabel={(option) => option?.container}
                   value={updatedServer?.container}
                   onChange={handleMultiContainerChange}
                   renderInput={(params) => (
@@ -455,7 +455,11 @@ const UpdateServer = () => {
                   )}
                   renderTags={(tagValue, getTagProps) =>
                     tagValue.map((option, index) => (
-                      <Chip label={option} {...getTagProps({ index })} />
+                      <Chip
+                        key={option.container}
+                        label={option.container}
+                        {...getTagProps({ index })}
+                      />
                     ))
                   }
                 />

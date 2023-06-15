@@ -153,29 +153,40 @@ const ViewPackages = () => {
               Package Detail
             </MenuItem>
             <Divider />
-            <MenuItem onClick={() => handleUpdatePackage(ID)}>
+            <MenuItem
+              onClick={() => handleUpdatePackage(ID)}
+              disabled={
+                ID?.row?.isactive.toLowerCase() === "active" ? false : true
+              }
+            >
               <ListItemIcon>
                 <EditIcon style={{ color: "blue" }} />
               </ListItemIcon>
               <ListItemText primary="Update Package" />
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => handlePackagePlane(ID)}>
-              <ListItemText
-                sx={{
-                  textAlign: "center",
-                  color:
-                    ID?.row?.isactive.toLowerCase() === "active"
-                      ? "#D8000C"
-                      : "#4F8A10",
-                }}
-                primary={
-                  ID?.row?.isactive.toLowerCase() === "active"
-                    ? "TURN OFF PLAN"
-                    : "TURN ON PLAN"
-                }
-              />
-            </MenuItem>
+            {ID?.row?.Package === "trial" ? (
+              ""
+            ) : (
+              <span>
+                <Divider />
+                <MenuItem onClick={() => handlePackagePlane(ID)}>
+                  <ListItemText
+                    sx={{
+                      textAlign: "center",
+                      color:
+                        ID?.row?.isactive.toLowerCase() === "active"
+                          ? "#D8000C"
+                          : "#4F8A10",
+                    }}
+                    primary={
+                      ID?.row?.isactive.toLowerCase() === "active"
+                        ? "TURN OFF PLAN"
+                        : "TURN ON PLAN"
+                    }
+                  />
+                </MenuItem>
+              </span>
+            )}
           </Menu>
         </Box>
       ),

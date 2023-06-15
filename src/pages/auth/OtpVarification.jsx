@@ -11,7 +11,6 @@ const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
   showConfirmButton: false,
-  timer: 3000,
   timerProgressBar: true,
   width: "400px",
   didOpen: (toast) => {
@@ -60,37 +59,34 @@ const OtpVarification = () => {
           },
         };
         if (otp_resp?.data?.success) {
-          Swal.fire({
+          setLoader(false);
+          Toast.fire({
             icon: "success",
-            title: "Success!",
-            text: "Your OTP was confirmed successfully.",
-            confirmButtonText: "OK",
-            showLoaderOnConfirm: true,
-            preConfirm: async () => {
-              // API to verify OTP for user authentication.
-              console.log("config", config);
-              const userAuth = await axios.post(
-                `${BASE_URL}/userauthenticated`,
-                null,
-                config
-              );
-              console.log("unauthrespo:", userAuth);
-
-              if (userAuth?.data?.success && userAuth?.data?.UserRole) {
-                console.log("otpAlert", userAuth?.data?.isallowedalert);
-                localStorage.setItem("UserRole", userAuth?.data?.UserRole);
-                localStorage.setItem("alert", userAuth?.data?.isallowedalert);
-                localStorage.setItem("package", userAuth?.data?.isallowedtosel);
-                navigate(userAuth?.data?.URL);
-              } else {
-                setLoader(false);
-                Toast.fire({
-                  icon: "error",
-                  title: userAuth?.data?.messege,
-                  confirmButtonText: "OK",
-                });
-              }
-            },
+            title: "OTP confirmed",
+            timer: 3000,
+          }).then(async (result) => {
+            const userAuth = await axios.post(
+              `${BASE_URL}/userauthenticated`,
+              null,
+              config
+            );
+            console.log("unauthrespo:", userAuth);
+            if (userAuth?.data?.success && userAuth?.data?.UserRole) {
+              setLoader(false);
+              // console.log("otpAlert", userAuth?.data?.isallowedalert);
+              localStorage.setItem("UserRole", userAuth?.data?.UserRole);
+              localStorage.setItem("alert", userAuth?.data?.isallowedalert);
+              localStorage.setItem("package", userAuth?.data?.isallowedtosel);
+              navigate(userAuth?.data?.URL);
+            } else {
+              setLoader(false);
+              Toast.fire({
+                icon: "error",
+                title: userAuth?.data?.messege,
+                confirmButtonText: "OK",
+                timer: 3000,
+              });
+            }
           });
           setOtp(null);
         } else {
@@ -104,7 +100,6 @@ const OtpVarification = () => {
           setOtp(null);
         }
       }
-      setLoader(false);
     }
   };
 
@@ -123,11 +118,13 @@ const OtpVarification = () => {
       Toast.fire({
         icon: "success",
         title: "OTP resend successfully.",
+        timer: 3000,
       });
     } else {
       Toast.fire({
         icon: "error",
         title: resend_resp?.data?.messege,
+        timer: 3000,
       });
     }
   };

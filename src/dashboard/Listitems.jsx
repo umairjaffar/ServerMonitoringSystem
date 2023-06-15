@@ -19,6 +19,7 @@ import Swal from "sweetalert2";
 const Listitems = ({ openServer, setOpenServer }) => {
   const navigate = useNavigate();
   const [servers, setServers] = useState();
+  const [selectedItem, setSelectedItem] = useState(0);
 
   const [UserRole, setUserRole] = useState();
   const [dashboardList, setDashboardList] = useState([]);
@@ -49,7 +50,6 @@ const Listitems = ({ openServer, setOpenServer }) => {
           }
         });
       }
-      
     } catch (error) {
       console.log("Get Server ERROR", error);
     }
@@ -160,9 +160,15 @@ const Listitems = ({ openServer, setOpenServer }) => {
           )}
         </ListItemButton>
       )}
-      <Collapse in={openServer} timeout="auto" unmountOnExit>
+      <Collapse
+        in={openServer}
+        timeout="auto"
+        unmountOnExit
+        sx={{ maxHeight: "50vh", overflowY: "scroll", overflowX: "hidden" }}
+      >
         <List component="div" disablePadding>
           {servers?.User_Servers_Data?.map((ser, indx) => {
+            const isSelected = selectedItem === indx;
             // console.log("SERVER", ser);
             return (
               <Link
@@ -173,7 +179,12 @@ const Listitems = ({ openServer, setOpenServer }) => {
                 <ListItemButton
                   sx={{
                     paddingY: 0,
+                    backgroundColor: isSelected ? "#9e9e9e" : "transparent",
+                    ":hover": {
+                      backgroundColor: "#757575",
+                    },
                   }}
+                  onClick={() => setSelectedItem(indx)}
                 >
                   <ListItemText
                     primary={

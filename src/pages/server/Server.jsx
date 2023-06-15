@@ -227,13 +227,13 @@ const Server = () => {
             title: "Download Zip file",
             // text: "You won't be able to revert this!",
             icon: "info",
-            // showCancelButton: true,
+            showCancelButton: true,
             confirmButtonColor: "#3085d6",
-            // cancelButtonColor: "#d33",
+            cancelButtonColor: "#d33",
             confirmButtonText: "Download",
             showLoaderOnConfirm: true,
             preConfirm: async () => {
-              axios({
+              await axios({
                 method: "post",
                 url: `${BASE_URL}/serverdetailfile`,
                 data: null,
@@ -262,12 +262,26 @@ const Server = () => {
                   Swal.showValidationMessage(`Request failed: ${error}`);
                 });
             },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire(
+                "Downloaded!",
+                "Your file has been downloaded.",
+                "success"
+              ).then((result) => {
+                if (result.isConfirmed) {
+                  navigate("/dashboard/user/viewServers");
+                }
+              });
+              setFormValues(initialValues);
+              setSelectService([]);
+              setSelectContainer([]);
+              setNewContainer("");
+              setNewService("");
+            } else if (result.isDismissed) {
+              navigate("/dashboard/user/viewServers");
+            }
           });
-          setFormValues(initialValues);
-          setSelectService([]);
-          setSelectContainer([]);
-          setNewContainer("");
-          setNewService("");
         } else if (response?.data?.token_error) {
           setDisable(false);
           Swal.fire("ERROR!", response?.data?.message, "error").then(

@@ -284,7 +284,7 @@ const UnvarifiedUsers = () => {
     };
     Swal.fire({
       title: "Are you sure?",
-      text: "You want to resend link on emails!",
+      text: "You want to resend email confirmation link to selected emails!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -367,7 +367,7 @@ const UnvarifiedUsers = () => {
                 fontWeight: "500",
               }}
             >
-              Set Email Alerts
+              Resend confirmation link
             </Button>
           </Box>
         </>

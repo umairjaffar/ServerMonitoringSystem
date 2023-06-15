@@ -92,7 +92,7 @@ const Packages = () => {
       <Box display="flex" justifyContent="end" marginRight={2}>
         <ListItemIcon
           onClick={handleNavigate}
-          sx={{ cursor: "pointer" }}
+          sx={{ cursor: "pointer", color: "#42a5f5" }}
           disabled={loading}
         >
           Navigate to dashboard

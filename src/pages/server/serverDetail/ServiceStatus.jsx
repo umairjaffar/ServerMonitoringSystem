@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography, styled } from "@mui/material";
 import React from "react";
 import {
   CartesianGrid,
@@ -10,10 +10,19 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import CircleIcon from "@mui/icons-material/Circle";
 
+const StatusUp = styled(CircleIcon)`
+  font-size: 15px;
+  color: green;
+`;
+const StatusDown = styled(CircleIcon)`
+  font-size: 15px;
+  color: red;
+`;
 const ServiceStatus = (props) => {
   const { data: statusGraph } = props;
- 
+
   const formatXAxis = (timeString) => {
     const dateTime = new Date(timeString);
     const day = dateTime.toLocaleString("default", { weekday: "short" });
@@ -42,11 +51,14 @@ const ServiceStatus = (props) => {
   // console.log("chartData", chartData);
 
   return (
-    <Box width="100%" boxShadow={3} paddingY={3}>
+    <Box
+      width="100%"
+      //  boxShadow={3}
+    >
       <Typography
         sx={{
           marginX: 3,
-          fontSize: 28,
+          fontSize: 22,
           fontWeight: "500",
           color: "#000000",
           marginBottom: 2,
@@ -54,7 +66,7 @@ const ServiceStatus = (props) => {
       >
         {props.name}
       </Typography>
-      <Grid container justifyContent={"space-between"} gap={2}>
+      <Grid container justifyContent={"space-evenly"} gap={2}>
         {statusGraph ? (
           statusGraph?.map((item, index) => {
             // console.log("ItemGraph2", item.Value);
@@ -77,15 +89,9 @@ const ServiceStatus = (props) => {
               <Grid
                 item
                 xs={11}
-                sm={statusGraph.length > 1 ? 5.5 : 11}
-                // md={
-                //   statusGraph.length === 1
-                //     ? 11
-                //     : statusGraph.length === 2
-                //     ? 5.5
-                //     : 3.9
-                // }
+                md={statusGraph.length > 1 ? 5.5 : 11}
                 key={index}
+                borderBottom={"1px solid black"}
               >
                 <ResponsiveContainer width="95%" height={250}>
                   <LineChart
@@ -129,25 +135,48 @@ const ServiceStatus = (props) => {
                     <Line type="monotone" dataKey="time" stroke="#82ca9d" />
                   </LineChart>
                 </ResponsiveContainer>
-                <Typography
-                  sx={{
-                    textAlign: "center",
-                    marginY: 2,
-                    fontSize: 18,
-                    fontWeight: "600",
-                    color: "gray",
-                  }}
-                >
-                  {item.Name}
-                </Typography>
-                <Divider />
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flex: "wrap",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 1 }}
+                    >
+                      <StatusUp />
+                      <Typography> Status Up</Typography>
+                    </div>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 1 }}
+                    >
+                      <StatusDown />
+                      <Typography> Status Down</Typography>
+                    </div>
+                  </Box>
+                  <Typography
+                    sx={{
+                      textAlign: "center",
+                      marginY: 2,
+                      fontSize: 18,
+                      fontWeight: "600",
+                      color: "gray",
+                    }}
+                  >
+                    {item.Name}
+                  </Typography>
+                </Box>
               </Grid>
             );
           })
         ) : (
           <Typography
             sx={{
-              width:"100%",
+              width: "100%",
               textAlign: "center",
               marginY: 2,
               fontSize: 24,

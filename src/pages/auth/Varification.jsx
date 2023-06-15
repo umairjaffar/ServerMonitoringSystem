@@ -28,7 +28,7 @@ const Varification = () => {
   const [verificatioDisable, setVerificatioDisable] = useState(false);
 
   const verificationFunction = async () => {
-    return await axios.post(`${BASE_URL}/varification/${id}`); // API
+    return await axios.post(`${BASE_URL}/verification/${id}`); // API
   };
 
   useEffect(() => {

@@ -49,11 +49,11 @@ const CreatePackage = () => {
       [e.target.name]: parseInt(e.target.value),
     });
   };
-
+  console.log("errors", errors);
   const validate = (values) => {
     const errors = {};
-    const numRegex = /^[0-9]+$/;
-    const stringRegex = /^[a-zA-Z]+$/;
+    const numRegex = /^(\d+|\d+\.\d+)$/;
+    const stringRegex = /^[a-zA-Z\s]+$/;
     if (!values.name) {
       errors.name = "Package name must be required!";
     } else if (!stringRegex.test(values.name)) {
@@ -61,8 +61,53 @@ const CreatePackage = () => {
     }
 
     if (values.price) {
-      if (!numRegex.test(values.price)) {
+      if (values.price <= 0) {
+        errors.price = "Package price must be grater than 0!";
+      } else if (values.price > 100000) {
+        errors.price = "Package price must be less than 100000!";
+      } else if (!numRegex.test(values.price)) {
         errors.price = "Package price accept only numbers!";
+      }
+    }
+
+    if (!values.description) {
+      errors.description = "Package description must be required!";
+    } else if (values.description.length <= 0) {
+      errors.description = "Package description must be grater than 0!";
+    } else if (values.description.length > 256) {
+      errors.description = "Package description must be less than 256!";
+    }
+
+    if (values.servers) {
+      if (values.servers <= 0) {
+        errors.servers = "Number of servers must be grater than 0!";
+      } else if (values.servers > 100) {
+        errors.servers = "Number of servers must be less than 100!";
+      } else if (!numRegex.test(values.servers)) {
+        errors.servers = "Number of servers accept only numbers!";
+      }
+    }
+    if (values.devopUsers) {
+      if (values.devopUsers <= 0) {
+        errors.devopUsers = "Number of devopUsers must be grater than 0!";
+      } else if (values.devopUsers > 100) {
+        errors.devopUsers = "Number of devopUsers must be less than 100!";
+      } else if (!numRegex.test(values.devopUsers)) {
+        errors.devopUsers = "Number of devopUsers accept only numbers!";
+      }
+    }
+    if (values.monitorUsers) {
+      if (values.monitorUsers <= 0) {
+        errors.monitorUsers = "Number of monitorUsers must be grater than 0!";
+      } else if (values.monitorUsers > 100) {
+        errors.monitorUsers = "Number of monitorUsers must be less than 100!";
+      } else if (!numRegex.test(values.monitorUsers)) {
+        errors.monitorUsers = "Number of monitorUsers accept only numbers!";
+      }
+    }
+    if (values.taxPercentage) {
+      if (values.taxPercentage <= 0) {
+        errors.taxPercentage = "TaxPercentage must be grater than 0!";
       }
     }
 
@@ -71,6 +116,7 @@ const CreatePackage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const accesstoken = localStorage.getItem("access_token");
     const config = {
       headers: {
@@ -78,10 +124,11 @@ const CreatePackage = () => {
         "Content-Type": "application/json",
       },
     };
+    console.log("createPackage", createPackage);
     const trialData = {
-      activePackage: createPackage.activePackage,
+      activePackage: "active",
       name: createPackage.name,
-      typeofpack: createPackage.typeofpack,
+      typeofpack: "monthly",
       servers: createPackage.servers,
       devopUsers: createPackage.devopUsers,
       monitorUsers: createPackage.monitorUsers,
@@ -118,7 +165,7 @@ const CreatePackage = () => {
             if (response?.data?.success) {
               Swal.fire(
                 "Created!",
-                "Package created successfull.",
+                "Package created successfully.",
                 "success"
               ).then((result) => {
                 if (result.isConfirmed) {
@@ -217,6 +264,7 @@ const CreatePackage = () => {
               value={createPackage.description}
               onChange={handleChange}
             />
+            <Typography color={"error"}>{errors.description}</Typography>
           </Grid>
           {/* <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
             <TextField
@@ -248,6 +296,7 @@ const CreatePackage = () => {
             <Grid item xs={12} sm={5.5} sx={{ marginTop: 1 }}>
               <TextField
                 fullWidth
+                type="number"
                 label="Package Price"
                 name="price"
                 value={createPackage.price}
@@ -265,6 +314,7 @@ const CreatePackage = () => {
               name="servers"
               onChange={handleChangeNumber}
             />
+            <Typography color={"error"}>{errors.servers}</Typography>
           </Grid>
           <Grid item xs={12} sm={5.5} sx={{ marginTop: 1 }}>
             <TextField
@@ -275,6 +325,7 @@ const CreatePackage = () => {
               name="devopUsers"
               onChange={handleChangeNumber}
             />
+            <Typography color={"error"}>{errors.devopUsers}</Typography>
           </Grid>
           <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
             <TextField
@@ -285,6 +336,7 @@ const CreatePackage = () => {
               name="monitorUsers"
               onChange={handleChangeNumber}
             />
+            <Typography color={"error"}>{errors.monitorUsers}</Typography>
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 1 }}>
             <FormControlLabel
@@ -323,20 +375,24 @@ const CreatePackage = () => {
               <Grid item xs={12} sm={5.5} sx={{ marginTop: 1 }}>
                 <TextField
                   fullWidth
+                  type="number"
                   label="SetUp Fee"
                   value={createPackage.stepupfee}
                   name="stepupfee"
                   onChange={handleChange}
                 />
+                <Typography color={"error"}>{errors.stepupfee}</Typography>
               </Grid>
               <Grid item xs={12} sm={6} sx={{ marginTop: 1 }}>
                 <TextField
                   fullWidth
+                  type="number"
                   label="Tax Percentage"
                   value={createPackage.taxPercentage}
                   name="taxPercentage"
                   onChange={handleChange}
                 />
+                <Typography color={"error"}>{errors.taxPercentage}</Typography>
               </Grid>
             </Grid>
             <Grid
@@ -373,66 +429,82 @@ const CreatePackage = () => {
                 />
               </Grid>
             </Grid>
+            <Grid
+              container
+              sx={{
+                justifyContent: "space-between",
+                marginTop: 2,
+              }}
+            >
+              <Grid
+                item
+                xs={12}
+                sm={5.5}
+                sx={{ marginLeft: 0.2, alignItems: "end" }}
+              >
+                <FormLabel
+                  sx={{ fontSize: 20, fontWeight: "400", color: "black" }}
+                >
+                  <span style={{ fontStyle: "italic" }}>Status:</span>
+                </FormLabel>
+                <RadioGroup
+                  name="activePackage"
+                  value={createPackage?.activePackage}
+                  onChange={handleChange}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    marginLeft: 3,
+                  }}
+                >
+                  <FormControlLabel
+                    value="active"
+                    control={<Radio />}
+                    label="Active"
+                  />
+                  <FormControlLabel
+                    value="inactive"
+                    control={<Radio />}
+                    label="Inactive"
+                  />
+                </RadioGroup>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                sx={{ marginLeft: 0.2, alignItems: "end" }}
+              >
+                <FormLabel
+                  sx={{ fontSize: 20, fontWeight: "400", color: "black" }}
+                >
+                  <span style={{ fontStyle: "italic" }}>Duration:</span>
+                </FormLabel>
+                <RadioGroup
+                  name="typeofpack"
+                  value={createPackage.typeofpack}
+                  onChange={handleChange}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    marginLeft: 3,
+                  }}
+                >
+                  <FormControlLabel
+                    value="monthly"
+                    control={<Radio />}
+                    label="Monthly"
+                  />
+                  <FormControlLabel
+                    value="yearly"
+                    control={<Radio />}
+                    label="Yearly"
+                  />
+                </RadioGroup>
+              </Grid>
+            </Grid>
           </>
         )}
-        {/* Radio Buttons */}
-        <Grid
-          container
-          sx={{
-            justifyContent: "space-between",
-            marginTop: 2,
-          }}
-        >
-          <Grid
-            item
-            xs={12}
-            sm={5.5}
-            sx={{ marginLeft: 0.2, alignItems: "end" }}
-          >
-            <FormLabel sx={{ fontSize: 20, fontWeight: "400", color: "black" }}>
-              <span style={{ fontStyle: "italic" }}>Status:</span>
-            </FormLabel>
-            <RadioGroup
-              name="activePackage"
-              value={createPackage?.activePackage}
-              onChange={handleChange}
-              style={{ display: "flex", flexDirection: "row", marginLeft: 3 }}
-            >
-              <FormControlLabel
-                value="active"
-                control={<Radio />}
-                label="Active"
-              />
-              <FormControlLabel
-                value="inactive"
-                control={<Radio />}
-                label="inactive"
-              />
-            </RadioGroup>
-          </Grid>
-          <Grid item xs={12} sm={6} sx={{ marginLeft: 0.2, alignItems: "end" }}>
-            <FormLabel sx={{ fontSize: 20, fontWeight: "400", color: "black" }}>
-              <span style={{ fontStyle: "italic" }}>Duration:</span>
-            </FormLabel>
-            <RadioGroup
-              name="typeofpack"
-              value={createPackage.typeofpack}
-              onChange={handleChange}
-              style={{ display: "flex", flexDirection: "row", marginLeft: 3 }}
-            >
-              <FormControlLabel
-                value="monthly"
-                control={<Radio />}
-                label="Monthly"
-              />
-              <FormControlLabel
-                value="yearly"
-                control={<Radio />}
-                label="Yearly"
-              />
-            </RadioGroup>
-          </Grid>
-        </Grid>
 
         <Box sx={{ marginTop: 3, display: "flex", justifyContent: "center" }}>
           <Button

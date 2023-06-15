@@ -147,7 +147,7 @@ const UpdateUserDetail = () => {
             if (response?.data?.success) {
               Swal.fire(
                 "Updated!",
-                "User updated successfull.",
+                "User updated successfully.",
                 "success"
               ).then((result) => {
                 if (result.isConfirmed) {

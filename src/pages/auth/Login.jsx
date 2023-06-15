@@ -37,6 +37,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [formErrors, setFormErrors] = useState({});
   const [loginDisable, setLoginDisable] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -48,43 +49,62 @@ const Login = () => {
     setFormValues({ ...formValues, [name]: value });
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (!values.email) {
+      errors.email = "User email must be required!";
+    }
+    if (!values.password) {
+      errors.password = "User password must be required!";
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("email", formValues.email);
     formData.append("password", formValues.password);
-    try {
-      setLoginDisable(true);
-      setTimeout(() => {
-        setLoginDisable(false);
-      }, 10000);
 
-      const response = await axios.post(`${BASE_URL}/login`, formData); //API
-      // console.log("resp", response)
-      if (response?.data?.sucess) {
-        Toast.fire({
-          icon: "success",
-          title: "Login Successfull",
-          timer: 2000,
-        }).then((result) => {
-          localStorage.setItem(
-            "verificationtoken",
-            response?.data?.verificationtoken
-          );
-          const newExpiryTimestamp = new Date();
-          newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + 120); // Set expiry time to 2 minutes (120 seconds)
-          localStorage.setItem("expiryTimestamp", newExpiryTimestamp);
-          navigate("/otpVarification");
-        });
-      } else {
-        Toast.fire({
-          icon: "error",
-          title: response?.data?.messege,
-          timer: 9000,
-        });
+    const validationErrors = validate(formValues);
+    setFormErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        setLoginDisable(true);
+        setTimeout(() => {
+          setLoginDisable(false);
+        }, 10000);
+
+        const response = await axios.post(`${BASE_URL}/login`, formData); //API
+        // console.log("resp", response)
+        if (response?.data?.sucess) {
+          Toast.fire({
+            icon: "success",
+            title: "Login Successfull",
+            timer: 2000,
+          }).then((result) => {
+            localStorage.setItem(
+              "verificationtoken",
+              response?.data?.verificationtoken
+            );
+            const newExpiryTimestamp = new Date();
+            newExpiryTimestamp.setSeconds(
+              newExpiryTimestamp.getSeconds() + 120
+            ); // Set expiry time to 2 minutes (120 seconds)
+            localStorage.setItem("expiryTimestamp", newExpiryTimestamp);
+            navigate("/otpVarification");
+          });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: response?.data?.messege,
+            timer: 9000,
+          });
+        }
+      } catch (error) {
+        console.log("LOGIN ERROR!", error.message);
       }
-    } catch (error) {
-      console.log("LOGIN ERROR!", error.message);
     }
   };
   const forgotHandler = async () => {
@@ -166,7 +186,7 @@ const Login = () => {
                 value={formValues.email}
                 onChange={handleChange}
               />
-              {/* <Typography color={"error"}>{formErrors.email}</Typography> */}
+              <Typography color={"error"}>{formErrors.email}</Typography>
               <TextField
                 margin="normal"
                 required
@@ -192,7 +212,7 @@ const Login = () => {
                   ),
                 }}
               />
-              {/* <Typography color={"error"}>{formErrors.password}</Typography> */}
+              <Typography color={"error"}>{formErrors.password}</Typography>
               <Button
                 type="submit"
                 fullWidth

@@ -37,11 +37,13 @@ const ServerPerformance = ({ serverPerformance, name }) => {
   // const tooltipLabelFormatter = (label) => console.log("label", label);
 
   return (
-    <Box width="100%" boxShadow={3} paddingY={3}>
+    <Box
+      width="100%"
+    >
       <Typography
         sx={{
           marginX: 3,
-          fontSize: 28,
+          fontSize: 22,
           fontWeight: "500",
           color: "#000000",
           marginBottom: 2,

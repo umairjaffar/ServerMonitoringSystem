@@ -83,7 +83,7 @@ export default function ManageUser() {
         >
           <Tab
             sx={{ fontWeight: "500", fontSize: 18 }}
-            label="Varified Users"
+            label="Verified Users"
             {...a11yProps(0)}
           />
           <Tab
@@ -92,7 +92,7 @@ export default function ManageUser() {
               fontSize: 18,
               borderLeft: "2px solid gray",
             }}
-            label="UnVarified Users"
+            label="UnVerified Users"
             {...a11yProps(1)}
           />
         </Tabs>

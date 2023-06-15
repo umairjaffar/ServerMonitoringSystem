@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../components/constant/constant";
@@ -19,8 +29,10 @@ const UpdateUser = () => {
     Package_type: "",
   };
   const [updateUser, setUpdateUser] = useState(initialValues);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // console.log("ROle", updateUser.Role);
   const getUser = async () => {
     const accesstoken = localStorage.getItem("access_token");
     // console.log("TOKEN", accesstoken);
@@ -64,6 +76,34 @@ const UpdateUser = () => {
     });
   };
 
+  const validate = (values) => {
+    console.log("Values.fname", values.First_Name);
+    const errors = {};
+    const stringRegex = /^[a-zA-Z]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!values.First_Name) {
+      errors.First_Name = "First name must be required!";
+    } else if (!stringRegex.test(values.First_Name)) {
+      errors.First_Name = "String containing only English alphabets!";
+    }
+
+    if (!values.Last_Name) {
+      errors.Last_Name = "Last name must be required!";
+    } else if (!stringRegex.test(values.Last_Name)) {
+      errors.Last_Name = "String containing only English alphabets!";
+    }
+
+    if (!values.email) {
+      errors.email = "User email must be required!";
+    } else if (!regex.test(values.email)) {
+      errors.email = "This is not a valid email format!";
+    }
+
+    return errors;
+  };
+
+  console.log("errors", errors);
+
   const handleSubmit = () => {
     const formData = new FormData();
     formData.append("fname", updateUser.First_Name);
@@ -86,47 +126,53 @@ const UpdateUser = () => {
         "Content-Type": "application/json",
       },
     };
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Update it!",
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}/changeuserdatabyadmin/${id}`,
-            jsonData,
-            config
-          );
-          console.log("updateRes", response);
-          if (response?.data?.success) {
-            Swal.fire("Updated!", "User updated successfull.", "success").then(
-              (result) => {
+    const validationErrors = validate(updateUser);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Update it!",
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          try {
+            const response = await axios.post(
+              `${BASE_URL}/changeuserdatabyadmin/${id}`,
+              jsonData,
+              config
+            );
+            console.log("updateRes", response);
+            if (response?.data?.success) {
+              Swal.fire(
+                "Updated!",
+                "User updated successfully.",
+                "success"
+              ).then((result) => {
                 if (result.isConfirmed) {
                   navigate("/dashboard/admin/viewUsers");
                 }
-              }
-            );
-          } else if (response?.data?.token_error) {
-            Swal.fire("ERROR!", response?.data?.message, "error").then(
-              (result) => {
-                if (result.isConfirmed) {
-                  navigate("/login");
+              });
+            } else if (response?.data?.token_error) {
+              Swal.fire("ERROR!", response?.data?.message, "error").then(
+                (result) => {
+                  if (result.isConfirmed) {
+                    navigate("/login");
+                  }
                 }
-              }
-            );
-          } else {
-            Swal.fire("Error!", response?.data?.messege, "error");
+              );
+            } else {
+              Swal.fire("Error!", response?.data?.messege, "error");
+            }
+          } catch (error) {
+            console.log("changeuserdatabyadmin ERROR", error);
           }
-        } catch (error) {
-          console.log("changeuserdatabyadmin ERROR", error);
-        }
-      },
-    });
+        },
+      });
+    }
   };
 
   return (
@@ -183,6 +229,7 @@ const UpdateUser = () => {
                 value={updateUser.First_Name}
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.First_Name}</Typography>
             </Grid>
             <Grid item xs={12} sm={5.5} sx={{ marginTop: { xs: 2, sm: 0 } }}>
               <TextField
@@ -192,6 +239,7 @@ const UpdateUser = () => {
                 value={updateUser.Last_Name}
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.Last_Name}</Typography>
             </Grid>
           </Grid>
           {/* Package Description */}
@@ -210,15 +258,21 @@ const UpdateUser = () => {
                 value={updateUser.email}
                 onChange={handleChange}
               />
+              <Typography color={"error"}>{errors.email}</Typography>
             </Grid>
             <Grid item xs={12} sx={{ marginTop: 2 }}>
-              <TextField
-                fullWidth
-                label="User Role"
-                name="Role"
-                value={updateUser.Role}
-                onChange={handleChange}
-              />
+              <FormControl fullWidth>
+                <InputLabel>User Role</InputLabel>
+                <Select
+                  label="User Role"
+                  name="Role"
+                  value={updateUser.Role}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="prodowner">Prodowner</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
           <Grid

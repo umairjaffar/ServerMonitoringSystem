@@ -96,6 +96,14 @@ const VarifiedUsers = () => {
       cellClassName: "super-app-theme--cell",
     },
     {
+      field: "Issuspended",
+      headerName: "Suspend",
+      minWidth: 100,
+      flex: 1,
+      headerClassName: "super-app-theme--header",
+      cellClassName: "super-app-theme--cell",
+    },
+    {
       field: "actions",
       headerName: "Actions",
       minWidth: 100,
@@ -163,6 +171,19 @@ const VarifiedUsers = () => {
               </ListItemIcon>
               Delete User
             </MenuItem>
+            {/*  */}
+            <Divider />
+            <MenuItem onClick={() => handleSuspendUser(ID)}>
+              <ListItemText
+                sx={{
+                  textAlign: "center",
+                  color: ID?.row?.Issuspended ? "#4F8A10" : "#D8000C",
+                }}
+                primary={
+                  ID?.row?.Issuspended ? "UnSuspend User" : "Suspend User"
+                }
+              />
+            </MenuItem>
           </Menu>
         </>
       ),
@@ -177,6 +198,67 @@ const VarifiedUsers = () => {
     // console.log("updateID", ID);
     navigate(`/dashboard/user/updateUserDetail/${ID.id}`);
     handleClose();
+  };
+  const handleSuspendUser = (ID) => {
+    console.log("SuSID", ID);
+    const accesstoken = localStorage.getItem("access_token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accesstoken}`,
+        "Content-Type": "application/json",
+      },
+    };
+    Swal.fire({
+      title: "Are you sure?",
+      text: ID?.row?.Issuspended
+        ? "Are you sure you want to unsuspend the user?"
+        : "Are you sure you want to suspend the user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "yes, Change it!",
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${BASE_URL}/suspenduser/${ID?.row?.Email}`,
+            JSON.stringify({
+              issuspended: ID?.row?.Issuspended ? false : true,
+            }),
+            config
+          );
+          if (response?.data?.success) {
+            getUsers();
+            Swal.fire(
+              response?.data?.alertmsg,
+              response?.data?.messege,
+              "success"
+            ).then((result) => {
+              if (result.isConfirmed) {
+                navigate("/dashboard/user/manageUsers");
+              }
+            });
+          } else if (response?.data?.token_error) {
+            Swal.fire("ERROR!", response?.data?.message, "error").then(
+              (result) => {
+                if (result.isConfirmed) {
+                  navigate("/login");
+                }
+              }
+            );
+          } else {
+            Swal.fire(
+              response?.data?.alertmsg,
+              response?.data?.messege,
+              "error"
+            );
+          }
+        } catch (error) {
+          console.log("suspenduser ERROR", error);
+        }
+      },
+    });
   };
   const handleDeleteUser = (ID) => {
     console.log("DelID", ID);

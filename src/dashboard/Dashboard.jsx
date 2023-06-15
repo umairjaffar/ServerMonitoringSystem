@@ -45,6 +45,7 @@ import UpdateUserDetail from "../pages/manageUser/UpdateUserDetail";
 import Profile from "../pages/profile/Profile";
 import ProtectedRoute from "../routes/ProtectedRoutes";
 import UpdateProfile from "../pages/profile/UpdateProfile";
+import PageNotFound from "../pages/PageNotFound";
 
 const drawerWidth = 255;
 
@@ -142,6 +143,12 @@ function DashboardContent() {
       setLoading(false);
       localStorage.removeItem("access_token");
       navigate(`/login`);
+    } else if (resp?.data?.token_error) {
+      Swal.fire("ERROR!", resp?.data?.message, "error").then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
     } else {
       setLoading(false);
       Swal.fire({
@@ -315,6 +322,7 @@ function DashboardContent() {
           <Container maxWidth="xl">
             {!loading ? (
               <Routes>
+                <Route path="*" element={<PageNotFound />} />
                 {UserRole === "admin" || UserRole === "superadmin" ? (
                   <>
                     <Route
@@ -335,11 +343,15 @@ function DashboardContent() {
                               path="updatePackage/:name"
                               element={<UpdatePackage />}
                             />
-                            <Route path="viewUsers" element={<ViewUsers />} />
+                            <Route
+                              path="viewUsers"
+                              element={<ViewUsers role={UserRole} />}
+                            />
                             <Route
                               path="updateUser/:id"
                               element={<UpdateUser />}
                             />
+                            <Route path="*" element={<PageNotFound />} />
                           </Routes>
                         </ProtectedRoute>
                       }
@@ -354,6 +366,7 @@ function DashboardContent() {
                               path="updateProfile"
                               element={<UpdateProfile />}
                             />
+                            <Route path="*" element={<PageNotFound />} />
                           </Routes>
                         </ProtectedRoute>
                       }
@@ -400,6 +413,7 @@ function DashboardContent() {
                             path="updateProfile"
                             element={<UpdateProfile />}
                           />
+                          <Route path="*" element={<PageNotFound />} />
                         </Routes>
                       </ProtectedRoute>
                     }
@@ -435,6 +449,7 @@ function DashboardContent() {
                             path="updateProfile"
                             element={<UpdateProfile />}
                           />
+                          <Route path="*" element={<PageNotFound />} />
                         </Routes>
                       </ProtectedRoute>
                     }
@@ -455,6 +470,7 @@ function DashboardContent() {
                             path="updateProfile"
                             element={<UpdateProfile />}
                           />
+                          <Route path="*" element={<PageNotFound />} />
                         </Routes>
                       </ProtectedRoute>
                     }

@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography, styled } from "@mui/material";
 import React from "react";
 import {
   CartesianGrid,
@@ -10,11 +10,21 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import CircleIcon from "@mui/icons-material/Circle";
+
+const StatusUp = styled(CircleIcon)`
+  font-size: 15px;
+  color: green;
+`;
+const StatusDown = styled(CircleIcon)`
+  font-size: 15px;
+  color: red;
+`;
 
 const ContainerStatus = (props) => {
   const { data: containerGraph } = props;
   // console.log("containerGraph", containerGraph);
- 
+
   const formatXAxis = (timeString) => {
     const dateTime = new Date(timeString);
     const day = dateTime.toLocaleString("default", { weekday: "short" });
@@ -43,11 +53,13 @@ const ContainerStatus = (props) => {
   // console.log("chartData", chartData);
 
   return (
-    <Box width="100%" boxShadow={3} paddingY={3}>
+    <Box
+      width="100%"
+    >
       <Typography
         sx={{
           marginX: 3,
-          fontSize: 28,
+          fontSize: 22,
           fontWeight: "500",
           color: "#000000",
           marginBottom: 2,
@@ -124,6 +136,28 @@ const ContainerStatus = (props) => {
                     <Line type="monotone" dataKey="time" stroke="#82ca9d" />
                   </LineChart>
                 </ResponsiveContainer>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flex: "wrap",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <StatusUp />
+                    <Typography> Status Up</Typography>
+                  </div>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <StatusDown />
+                    <Typography> Status Down</Typography>
+                  </div>
+                </Box>
                 <Typography
                   sx={{
                     textAlign: "center",
